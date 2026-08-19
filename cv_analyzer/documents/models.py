@@ -19,15 +19,17 @@ class CV(models.Model):
         PROCESSED = "processed", "Processed"
         FAILED = "failed","Failed"
 
-    status = models.CharField(choices=Status.choices,
-                            default="pending",
-                            max_length=9)
+    status = models.CharField(
+        choices=Status.choices,
+        default="pending",
+        max_length=9
+    )
 
 class JobOffer(models.Model):
     owner = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name = "job_offers"
+        related_name = "job_offer"
         )
     title = models.CharField(max_length=30)
     raw_text = models.TextField()
