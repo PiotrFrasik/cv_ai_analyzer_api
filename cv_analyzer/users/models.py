@@ -9,8 +9,8 @@ class CustomUser(AbstractUser):
                                         )
 
     class Role(models.TextChoices):
-        CANDIDATE = "candidate"
-        RECRUITER = "recruiter"
+        CANDIDATE = "candidate", "Candidate"
+        RECRUITER = "recruiter", "Recruiter"
 
     role = models.CharField(blank=False, choices=Role.choices, max_length=10)
 
