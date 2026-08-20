@@ -2,6 +2,10 @@ from django.db import models
 from documents.models import CV, JobOffer
 
 class Analysis(models.Model):
+
+    class Meta:
+        verbose_name_plural = "analysis"
+
     cv = models.ForeignKey(
         CV,
         on_delete=models.CASCADE,
