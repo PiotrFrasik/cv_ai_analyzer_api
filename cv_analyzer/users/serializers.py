@@ -3,7 +3,10 @@ from django.contrib.auth.hashers import make_password
 from .models import CustomUser, CandidateProfile, RecruiterProfile
 
 class RegisterSerializer(serializers.ModelSerializer):
-
+    """
+    User registration. Creates a CustomUser with a hashed password
+    and assigns the default role of 'candidate'.
+    """
     class Meta:
         model = CustomUser
         fields = ['username', 'email', 'password', 'phone_number']
@@ -40,7 +43,6 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'phone_number', 'candidate_profile', 'recruiter_profile']
 
     def update(self, instance, validated_data):
-        # Pop nested data — None if not sent in the request
         candidate_data = validated_data.pop('candidate_profile', None)
         recruiter_data = validated_data.pop('recruiter_profile', None)
 
@@ -67,3 +69,34 @@ class UserUpdateSerializer(serializers.ModelSerializer):
                 profile.save()
             
         return instance
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    """
+    Read-only serializer for displaying user profile data.
+    """
+    candidate_profile = CandidateProfileSerializer(read_only=True)
+    recruiter_profile = RecruiterProfileSerializer(read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email', 'phone_number', 'candidate_profile', 'recruiter_profile']
+
+    def to_representation(self, instance):
+
+        if instance.role == CustomUser.Role.CANDIDATE:
+            return {
+                'username': instance.username,
+                'email': instance.email,
+                'phone_number': instance.phone_number,
+                'candidate_profile': CandidateProfileSerializer(instance.candidate_profile).data
+            }
+
+        elif instance.role == CustomUser.Role.RECRUITER:
+            return {
+                'username': instance.username,
+                'email': instance.email,
+                'phone_number': instance.phone_number,
+                'recruiter_profile': RecruiterProfileSerializer(instance.recruiter_profile).data
+            }
+
+        return super().to_representation(instance)
