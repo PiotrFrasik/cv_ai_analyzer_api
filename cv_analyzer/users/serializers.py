@@ -1,5 +1,8 @@
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.password_validation import validate_password
+
 from .models import CustomUser, CandidateProfile, RecruiterProfile
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -12,6 +15,19 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'password', 'phone_number']
         extra_kwargs = {'password': {'write_only': True}}
 
+    def validate_password(self, value):
+        try:
+            validate_password(value)
+        except ValidationError as err:
+            raise serializers.ValidationError(err.messages)
+
+        special_characters = "!@#$%^&*()_+-="
+        has_special = any(char in special_characters for char in value)
+        if not has_special:
+            raise serializers.ValidationError("Password must contain at least one special character.")
+            
+        return value 
+
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = CustomUser(**validated_data) # Create new CustomUser object with validate data
@@ -19,6 +35,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.role = CustomUser.Role.CANDIDATE # Default role is candidate; an admin can change it to recruiter
         user.save()
         return user
+
 
 class CandidateProfileSerializer(serializers.ModelSerializer):
     class Meta:
