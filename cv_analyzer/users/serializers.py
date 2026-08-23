@@ -47,7 +47,41 @@ class RecruiterProfileSerializer(serializers.ModelSerializer):
         model = RecruiterProfile
         fields = ['department']
 
-class UserUpdateSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.ModelSerializer):
+    """
+    Read-only serializer for displaying user profile data.
+    """
+    candidate_profile = CandidateProfileSerializer(read_only=True)
+    recruiter_profile = RecruiterProfileSerializer(read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email', 'phone_number', 'candidate_profile', 'recruiter_profile']
+
+    def to_representation(self, instance):
+
+        if instance.role == CustomUser.Role.CANDIDATE:
+            return {
+                'username': instance.username,
+                'email': instance.email,
+                'phone_number': instance.phone_number,
+                'candidate_profile': CandidateProfileSerializer(instance.candidate_profile).data 
+                if hasattr(instance, 'candidate_profile') else None
+            }
+
+
+        elif instance.role == CustomUser.Role.RECRUITER:
+            return {
+                'username': instance.username,
+                'email': instance.email,
+                'phone_number': instance.phone_number,
+                'recruiter_profile': RecruiterProfileSerializer(instance.recruiter_profile).data
+                if hasattr(instance, 'recruiter_profile') else None
+            }
+
+        return super().to_representation(instance)
+
+class UserUpdateSerializer(UserProfileSerializer):
     """
     Universal serializer for updating user data.
     Handles both candidate and recruiter profiles based on instance.role.
@@ -86,37 +120,3 @@ class UserUpdateSerializer(serializers.ModelSerializer):
                 profile.save()
             
         return instance
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    """
-    Read-only serializer for displaying user profile data.
-    """
-    candidate_profile = CandidateProfileSerializer(read_only=True)
-    recruiter_profile = RecruiterProfileSerializer(read_only=True)
-
-    class Meta:
-        model = CustomUser
-        fields = ['username', 'email', 'phone_number', 'candidate_profile', 'recruiter_profile']
-
-    def to_representation(self, instance):
-
-        if instance.role == CustomUser.Role.CANDIDATE:
-            return {
-                'username': instance.username,
-                'email': instance.email,
-                'phone_number': instance.phone_number,
-                'candidate_profile': CandidateProfileSerializer(instance.candidate_profile).data 
-                if hasattr(instance, 'candidate_profile') else None
-            }
-
-
-        elif instance.role == CustomUser.Role.RECRUITER:
-            return {
-                'username': instance.username,
-                'email': instance.email,
-                'phone_number': instance.phone_number,
-                'recruiter_profile': RecruiterProfileSerializer(instance.recruiter_profile).data
-                if hasattr(instance, 'recruiter_profile') else None
-            }
-
-        return super().to_representation(instance)
