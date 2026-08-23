@@ -105,8 +105,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 'username': instance.username,
                 'email': instance.email,
                 'phone_number': instance.phone_number,
-                'candidate_profile': CandidateProfileSerializer(instance.candidate_profile).data
+                'candidate_profile': CandidateProfileSerializer(instance.candidate_profile).data 
+                if hasattr(instance, 'candidate_profile') else None
             }
+
 
         elif instance.role == CustomUser.Role.RECRUITER:
             return {
@@ -114,6 +116,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 'email': instance.email,
                 'phone_number': instance.phone_number,
                 'recruiter_profile': RecruiterProfileSerializer(instance.recruiter_profile).data
+                if hasattr(instance, 'recruiter_profile') else None
             }
 
         return super().to_representation(instance)
