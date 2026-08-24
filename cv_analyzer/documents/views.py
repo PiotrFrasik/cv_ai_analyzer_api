@@ -1,7 +1,9 @@
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated 
+
 from .models import CV, JobOffer
 from .serializers import CVCreateSerializer, JobOfferCreateSerializer, CVDetailSerializer, JobOfferDetailSerializer
-from rest_framework.permissions import IsAuthenticated 
+from .permissions import IsCVOwnerOrRecruiter
 
 class CVCreateAPIView(generics.CreateAPIView):
     queryset = CV.objects.all()
@@ -22,7 +24,7 @@ class JobOfferCreateAPIView(generics.CreateAPIView):
 class CVDetailAPIView(generics.RetrieveAPIView):
     queryset = CV.objects.all()
     serializer_class = CVDetailSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsCVOwnerOrRecruiter]
 
 class JobOfferDetailAPIView(generics.RetrieveAPIView):
     queryset = JobOffer.objects.all()
