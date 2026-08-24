@@ -18,3 +18,13 @@ class JobOfferCreateAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+class CVDetailAPIView(generics.RetrieveAPIView):
+    queryset = CV.objects.all()
+    serializer_class = CVDetailSerializer
+    permission_classes = [IsAuthenticated]
+
+class JobOfferDetailAPIView(generics.RetrieveAPIView):
+    queryset = JobOffer.objects.all()
+    serializer_class = JobOfferDetailSerializer
+    permission_classes = [IsAuthenticated]
