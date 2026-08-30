@@ -1,6 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+class Department(models.TextChoices):
+    IT = "it", "IT"
+    MARKETING = "marketing", "Marketing"
+    SALES = "sales", "Sales"
+    HR = "hr", "HR"
+    FINANCE = "finance", "Finance"
+    OPERATIONS = "operations", "Operations"
+    CUSTOMER_SUPPORT = "customer_support", "Customer Support"
+    LEGAL = "legal", "Legal"
+    PRODUCT = "product", "Product"
+    DESIGN = "design", "Design"
 
 class CustomUser(AbstractUser):
     phone_number = models.CharField(
@@ -31,6 +42,11 @@ class CandidateProfile(models.Model):
 
     city = models.CharField(max_length=30)
     country = models.CharField(max_length=30)
+
+    preferred_department = models.CharField(
+        max_length=30,
+        choices=Department.choices,
+        )
     
 class RecruiterProfile(models.Model):
     user = models.OneToOneField(
@@ -38,4 +54,8 @@ class RecruiterProfile(models.Model):
         on_delete=models.CASCADE,
         related_name='recruiter_profile'
     )
-    department = models.CharField(max_length=30)
+    department = models.CharField(
+        max_length=30,
+        choices=Department.choices,
+        default=Department.IT, 
+        )
