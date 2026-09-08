@@ -6,6 +6,7 @@ from .models import CustomUser, CandidateProfile, RecruiterProfile
 class CustomUserAdmin(UserAdmin):
     list_display = ['username', 'email', 'phone_number', 'role', 'is_staff']
     search_fields = ['username', 'email', 'phone_number', 'role']
+    fieldsets = UserAdmin.fieldsets + (('Additional Info', {'fields': ('phone_number', 'role')}),)
    
 @admin.register(CandidateProfile)
 class CandidateProfileAdmin(admin.ModelAdmin):
