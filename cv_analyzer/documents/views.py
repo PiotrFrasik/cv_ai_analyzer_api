@@ -2,9 +2,11 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated 
 
 from .models import CV, JobOffer
-from analysis.models import Analysis
 from .serializers import CVCreateSerializer, JobOfferCreateSerializer, CVDetailSerializer, JobOfferDetailSerializer
 from .permissions import IsCVOwnerOrRecruiter
+from .utils import extract_text_from_pdf
+
+from analysis.models import Analysis
 
 class CVCreateAPIView(generics.CreateAPIView):
     queryset = CV.objects.all()
@@ -13,11 +15,13 @@ class CVCreateAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         cv = serializer.save(owner=self.request.user)
+        cv.raw_text = extract_text_from_pdf(cv.file)
         if hasattr(self.request.user, 'candidate_profile'):
             preferred_department = self.request.user.candidate_profile.preferred_department
             offers = JobOffer.objects.filter(owner__recruiter_profile__department=preferred_department)
             analyses = [Analysis(cv=cv, job_offer=offer) for offer in offers]
             Analysis.objects.bulk_create(analyses)
+        cv.save()
 
 class JobOfferCreateAPIView(generics.CreateAPIView):
     queryset = JobOffer.objects.all()
@@ -31,7 +35,8 @@ class JobOfferCreateAPIView(generics.CreateAPIView):
             cvs = CV.objects.filter(owner__candidate_profile__preferred_department=department)
             analyses = [Analysis(cv=cv, job_offer=job_offer) for cv in cvs]
             Analysis.objects.bulk_create(analyses)
-
+        job_offer.save()
+        
 class CVDetailAPIView(generics.RetrieveAPIView):
     queryset = CV.objects.all()
     serializer_class = CVDetailSerializer
