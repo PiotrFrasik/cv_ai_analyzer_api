@@ -40,7 +40,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 class CandidateProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CandidateProfile
-        fields = ['salary_min', 'salary_max', 'city', 'country']
+        fields = ['salary_min', 'salary_max', 'city', 'country', 'preferred_department']
 
 class RecruiterProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -111,6 +111,7 @@ class UserUpdateSerializer(UserProfileSerializer):
                 profile.salary_max = candidate_data.get('salary_max', profile.salary_max)
                 profile.city = candidate_data.get('city', profile.city)
                 profile.country = candidate_data.get('country', profile.country)
+                profile.preferred_department = candidate_data.get('preferred_department', profile.preferred_department)
                 profile.save()
 
         elif instance.role == CustomUser.Role.RECRUITER and recruiter_data:
