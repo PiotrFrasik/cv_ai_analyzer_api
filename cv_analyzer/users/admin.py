@@ -1,11 +1,12 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser, CandidateProfile, RecruiterProfile
 
 @admin.register(CustomUser)
-class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ['phone_number', 'role']
-    search_fields = ['role']
-
+class CustomUserAdmin(UserAdmin):
+    list_display = ['username', 'email', 'phone_number', 'role', 'is_staff']
+    search_fields = ['username', 'email', 'phone_number', 'role']
+   
 @admin.register(CandidateProfile)
 class CandidateProfileAdmin(admin.ModelAdmin):
     list_display = ['user', 'salary_min', 'salary_max', 'city', 'country']
