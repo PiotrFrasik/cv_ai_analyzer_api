@@ -33,4 +33,5 @@ class JobOffer(models.Model):
         )
     title = models.CharField(max_length=30)
     raw_text = models.TextField()
+    skills = models.CharField(max_length=255, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)

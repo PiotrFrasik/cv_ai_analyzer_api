@@ -9,7 +9,7 @@ class CVCreateSerializer(serializers.ModelSerializer):
 class JobOfferCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobOffer
-        fields = ['raw_text','title']
+        fields = ['raw_text','title', 'skills']
 
 class CVDetailSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,4 +19,4 @@ class CVDetailSerializer(serializers.ModelSerializer):
 class JobOfferDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model= JobOffer
-        fields = ['owner', 'title', 'created_at']
+        fields = ['owner', 'title', 'created_at', 'skills']
