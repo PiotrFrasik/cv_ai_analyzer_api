@@ -35,4 +35,10 @@ class Analysis(models.Model):
         decimal_places=2,
         null=True,
     )
+
+    missing_skills = models.CharField(
+        max_length=255,
+        blank=True, 
+        default="")
+
     

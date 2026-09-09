@@ -8,12 +8,13 @@ class AnalysisDetailSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Analysis
-        fields = ['cv', 'job_offer', 'status', 'match_score']
+        fields = ['cv', 'job_offer', 'status', 'match_score', 'missing_skills']
 
     def to_representation(self, instance):
         return{
             'CV': instance.cv.owner.username,
             'job_offer': instance.job_offer.title,
             'status': instance.status,
-            'match_score': instance.match_score
+            'match_score': instance.match_score,
+            'missing_skills': instance.missing_skills,
         }
