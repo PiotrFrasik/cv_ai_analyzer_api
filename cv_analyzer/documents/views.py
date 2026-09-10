@@ -4,9 +4,10 @@ from rest_framework.permissions import IsAuthenticated
 from .models import CV, JobOffer
 from .serializers import CVCreateSerializer, JobOfferCreateSerializer, CVDetailSerializer, JobOfferDetailSerializer
 from .permissions import IsCVOwnerOrRecruiter
-from .utils import extract_text_from_pdf, get_ai_analysis
+from .utils import extract_text_from_pdf
 
 from analysis.models import Analysis
+from cv_analyzer.celery import run_ai_analysis
 
 class CVCreateAPIView(generics.CreateAPIView):
     queryset = CV.objects.all()
@@ -16,22 +17,18 @@ class CVCreateAPIView(generics.CreateAPIView):
     def perform_create(self, serializer):
         cv = serializer.save(owner=self.request.user)
         cv.raw_text = extract_text_from_pdf(cv.file)
+        cv.status = CV.Status.PROCESSED
         if hasattr(self.request.user, 'candidate_profile'):
             preferred_department = self.request.user.candidate_profile.preferred_department
             offers = JobOffer.objects.filter(owner__recruiter_profile__department=preferred_department)
-
-            analyses = []
             for offer in offers:
-                score, missing = get_ai_analysis(cv.raw_text, offer)
-                analyses.append(Analysis(
+                analysis = Analysis.objects.create(
                     cv=cv, 
                     job_offer=offer, 
-                    match_score=score, 
-                    missing_skills=missing,
                     status=Analysis.Status.PROCESSING
-                ))
+                )
+                run_ai_analysis.delay(analysis.id)
                 
-            Analysis.objects.bulk_create(analyses)
         cv.save()
 
 class JobOfferCreateAPIView(generics.CreateAPIView):
@@ -45,19 +42,15 @@ class JobOfferCreateAPIView(generics.CreateAPIView):
             department = self.request.user.recruiter_profile.department
             cvs = CV.objects.filter(owner__candidate_profile__preferred_department=department)
 
-            analyses = []
             for cv in cvs:
-                score, missing = get_ai_analysis(cv.raw_text, job_offer)
-                analyses.append(Analysis(
+                analysis = Analysis.objects.create(
                     cv=cv, 
                     job_offer=job_offer, 
-                    match_score=score, 
-                    missing_skills=missing,
                     status=Analysis.Status.PROCESSING
-                ))
-            
-            Analysis.objects.bulk_create(analyses)
-        job_offer.save()
+                )
+                run_ai_analysis.delay(analysis.id)
+
+            job_offer.save()
         
 class CVDetailAPIView(generics.RetrieveAPIView):
     queryset = CV.objects.all()
