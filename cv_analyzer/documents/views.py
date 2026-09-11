@@ -7,8 +7,7 @@ from .permissions import IsCVOwnerOrRecruiter
 from .utils import extract_text_from_pdf
 
 from analysis.models import Analysis
-from cv_analyzer.celery import run_ai_analysis
-
+from analysis.tasks import run_ai_analysis
 class CVCreateAPIView(generics.CreateAPIView):
     queryset = CV.objects.all()
     serializer_class = CVCreateSerializer
@@ -18,6 +17,8 @@ class CVCreateAPIView(generics.CreateAPIView):
         cv = serializer.save(owner=self.request.user)
         cv.raw_text = extract_text_from_pdf(cv.file)
         cv.status = CV.Status.PROCESSED
+        cv.save()
+        
         if hasattr(self.request.user, 'candidate_profile'):
             preferred_department = self.request.user.candidate_profile.preferred_department
             offers = JobOffer.objects.filter(owner__recruiter_profile__department=preferred_department)
@@ -29,8 +30,6 @@ class CVCreateAPIView(generics.CreateAPIView):
                 )
                 run_ai_analysis.delay(analysis.id)
                 
-        cv.save()
-
 class JobOfferCreateAPIView(generics.CreateAPIView):
     queryset = JobOffer.objects.all()
     serializer_class = JobOfferCreateSerializer
@@ -38,6 +37,8 @@ class JobOfferCreateAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         job_offer = serializer.save(owner=self.request.user)
+        job_offer.save()
+
         if hasattr(self.request.user, 'recruiter_profile'):
             department = self.request.user.recruiter_profile.department
             cvs = CV.objects.filter(owner__candidate_profile__preferred_department=department)
@@ -49,8 +50,6 @@ class JobOfferCreateAPIView(generics.CreateAPIView):
                     status=Analysis.Status.PROCESSING
                 )
                 run_ai_analysis.delay(analysis.id)
-
-            job_offer.save()
         
 class CVDetailAPIView(generics.RetrieveAPIView):
     queryset = CV.objects.all()
