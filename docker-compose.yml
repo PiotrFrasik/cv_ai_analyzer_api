@@ -1,0 +1,59 @@
+services:
+
+  redis:
+    image: redis:latest
+    container_name: redis-cv
+    ports:
+      - "6379:6379"
+
+  db:
+    image: postgres:16
+    container_name: postgres-cv
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  
+
+  web:
+    build: .
+    container_name: django-cv
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./cv_analyzer:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_started
+      db:
+        condition: service_healthy
+
+  celery:
+    build: .
+    container_name: celery-cv
+    command: celery -A cv_analyzer worker --loglevel=info
+    volumes:
+      - ./cv_analyzer:/app
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_started
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
