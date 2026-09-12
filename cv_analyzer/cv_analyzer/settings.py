@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'users',
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_spectacular', 
 ]
 
 MIDDLEWARE = [
@@ -163,3 +164,14 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Europe/Warsaw'
 CELERY_WORKER_POOL = 'solo' 
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'CV AI ANALYZER API',
+    'DESCRIPTION': 'A REST API for automatically analyzing candidates'' CVs against job offers using AI (Google Gemini), with asynchronous processing via Celery/Redis and Docker deployment.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
