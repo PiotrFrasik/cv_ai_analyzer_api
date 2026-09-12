@@ -6,6 +6,13 @@ class CVCreateSerializer(serializers.ModelSerializer):
         model = CV
         fields = ['file']
 
+    def validate(self, data):
+        request = self.context.get('request')
+        if CV.objects.filter(owner=request.user).exists():
+            raise serializers.ValidationError("You already have a CV uploaded.")
+        return data
+
+
 class JobOfferCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobOffer
