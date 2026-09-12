@@ -10,4 +10,3 @@ class CVAdmin(admin.ModelAdmin):
 class JobOfferAdmin(admin.ModelAdmin):
     list_display = ['owner', 'title', 'created_at']
     search_fields = ['owner__username', 'title', 'skills', 'created_at']
-

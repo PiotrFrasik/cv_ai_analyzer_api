@@ -37,7 +37,6 @@ class JobOfferCreateAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         job_offer = serializer.save(owner=self.request.user)
-        job_offer.save()
 
         if hasattr(self.request.user, 'recruiter_profile'):
             department = self.request.user.recruiter_profile.department
@@ -50,7 +49,7 @@ class JobOfferCreateAPIView(generics.CreateAPIView):
                     status=Analysis.Status.PROCESSING
                 )
                 run_ai_analysis.delay(analysis.id)
-        
+
 class CVDetailAPIView(generics.RetrieveAPIView):
     queryset = CV.objects.all()
     serializer_class = CVDetailSerializer
