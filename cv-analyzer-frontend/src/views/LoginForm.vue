@@ -1,10 +1,12 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '../services/api'
 
 const username = ref('')
 const password = ref('')
 const errorMessage = ref('')
+const router = useRouter()
 
 async function handleLogin() {
     errorMessage.value = ''
@@ -15,7 +17,7 @@ async function handleLogin() {
         })
         localStorage.setItem('access_token', response.data.access)
         localStorage.setItem('refresh_token', response.data.refresh)
-        alert('Login successful!')
+        router.push('/profile')
     } catch (error) {
         errorMessage.value = "Wrong login or password"
     }
@@ -32,7 +34,7 @@ async function handleLogin() {
             <label>Password:</label>
             <input v-model="password" type="password" />
         </div>
-        <button type="submit">Sing in</button>
+        <button type="submit">Sign in</button>
         <p v-if="errorMessage">{{ errorMessage }}</p>
     </form>
-</template>
+</template>

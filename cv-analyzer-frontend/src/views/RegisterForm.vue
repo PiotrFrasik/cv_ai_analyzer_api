@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '../services/api'
 
 const username = ref('')
@@ -7,6 +8,7 @@ const password = ref('')
 const phone_number = ref('')
 const email = ref('')
 const errorMessage = ref('')
+const router = useRouter()
 
 async function handleRegister() {
     errorMessage.value = ''
@@ -17,7 +19,7 @@ async function handleRegister() {
             phone_number: phone_number.value,
             email: email.value,
         })
-        alert('Register successful!')
+        router.push('/login')
     } catch (error) {
         errorMessage.value = "Registration failed. Please check your data and try again."
     }
