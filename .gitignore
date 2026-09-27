@@ -19,7 +19,15 @@ cv_files/
 # Environment variables
 .env
 *.env
+.env*.local
 
 # IDE
 .vscode/
 .idea/
+
+# Frontend / Node
+node_modules/
+dist/
+dist-ssr/
+.eslintcache
+
