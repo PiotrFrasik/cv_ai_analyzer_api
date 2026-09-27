@@ -1,5 +1,7 @@
 <script setup>
 import LoginForm from './components/LoginForm.vue'
+import RegisterForm from './components/RegisterForm.vue'
+
 </script>
 
 <template>
@@ -8,6 +10,10 @@ import LoginForm from './components/LoginForm.vue'
   </header>
 
   <main>
+    <p>LOGIN</p>
     <LoginForm />
+    <br />
+    <p>Register</p>
+    <RegisterForm />
   </main>
 </template>
