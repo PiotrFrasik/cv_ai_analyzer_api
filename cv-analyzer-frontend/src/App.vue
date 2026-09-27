@@ -1,19 +1,15 @@
 <script setup>
-import LoginForm from './components/LoginForm.vue'
-import RegisterForm from './components/RegisterForm.vue'
-
 </script>
 
 <template>
   <header>
-    
+    <nav>
+      <RouterLink to="/login">Login</RouterLink> |
+      <RouterLink to="/register">Register</RouterLink>
+    </nav>
   </header>
 
   <main>
-    <p>LOGIN</p>
-    <LoginForm />
-    <br />
-    <p>Register</p>
-    <RegisterForm />
+    <RouterView />
   </main>
-</template>
+</template>
