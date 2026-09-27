@@ -30,7 +30,7 @@ async function handleLogin() {
         </div>
         <div>
             <label>Password:</label>
-            <input v-model="password" type="text" />
+            <input v-model="password" type="password" />
         </div>
         <button type="submit">Sing in</button>
         <p v-if="errorMessage">{{ errorMessage }}</p>
