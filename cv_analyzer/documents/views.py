@@ -11,12 +11,18 @@ from analysis.models import Analysis
 from analysis.tasks import run_ai_analysis
 
 class CVThrottle(UserRateThrottle):
+    """Rate throttle for CV endpoints. Scope maps to DEFAULT_THROTTLE_RATES['cv']."""
     scope = 'cv'
 
 class JobOfferThrottle(UserRateThrottle):
+    """Rate throttle for JobOffer endpoints. Scope maps to DEFAULT_THROTTLE_RATES['job_offer']."""
     scope = 'job_offer'
 
 class CVCreateAPIView(generics.CreateAPIView):
+    """
+    Create a new CV. Replaces any existing CV for the user.
+    Extracts raw text from PDF and triggers AI analysis tasks for matching job offers.
+    """
     queryset = CV.objects.all()
     serializer_class = CVCreateSerializer
     permission_classes = [IsAuthenticated]
@@ -44,6 +50,9 @@ class CVCreateAPIView(generics.CreateAPIView):
                 run_ai_analysis.delay(analysis.id)
                 
 class JobOfferCreateAPIView(generics.CreateAPIView):
+    """
+    Create a new job offer and trigger AI analysis tasks for matching candidate CVs.
+    """
     queryset = JobOffer.objects.all()
     serializer_class = JobOfferCreateSerializer
     permission_classes = [IsAuthenticated]
@@ -65,6 +74,7 @@ class JobOfferCreateAPIView(generics.CreateAPIView):
                 run_ai_analysis.delay(analysis.id)
 
 class CVListAPIView(generics.ListAPIView):
+    """List CVs belonging to the authenticated user."""
     queryset = CV.objects.all()
     serializer_class = CVDetailSerializer
     permission_classes = [IsAuthenticated]
@@ -74,6 +84,7 @@ class CVListAPIView(generics.ListAPIView):
         return CV.objects.filter(owner=user)
 
 class JobOfferListAPIView(generics.ListAPIView):
+    """List job offers belonging to the authenticated user."""
     queryset = JobOffer.objects.all()
     serializer_class = JobOfferDetailSerializer
     permission_classes = [IsAuthenticated]
@@ -83,6 +94,11 @@ class JobOfferListAPIView(generics.ListAPIView):
         return JobOffer.objects.filter(owner=user)
 
 class CVDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update or delete a CV.
+    GET allows owner or recruiter; PUT/PATCH/DELETE restricted to owner only.
+    On update, replaces the file, re-extracts text, and re-runs AI analysis tasks.
+    """
     queryset = CV.objects.all()
 
     def get_throttles(self):
@@ -123,6 +139,11 @@ class CVDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
                 run_ai_analysis.delay(analysis.id)
 
 class JobOfferDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update or delete a job offer.
+    PUT/PATCH/DELETE restricted to owner only.
+    On update, drops existing analyses and re-runs AI tasks for matching CVs.
+    """
     queryset = JobOffer.objects.all()
 
     def get_throttles(self):
