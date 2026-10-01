@@ -4,11 +4,13 @@ from .serializers import RegisterSerializer, UserProfileSerializer, UserUpdateSe
 from rest_framework.permissions import AllowAny, IsAuthenticated 
 
 class UserRegisterAPIView(generics.CreateAPIView):
+    """Register a new user account."""
     queryset = CustomUser.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
 
 class UserProfileAPIView(generics.RetrieveAPIView):
+    """Retrieve the profile of the currently authenticated user."""
     queryset = CustomUser.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
@@ -18,6 +20,7 @@ class UserProfileAPIView(generics.RetrieveAPIView):
         return self.request.user
 
 class UserUpdateAPIView(generics.UpdateAPIView):
+    """Update the profile of the currently authenticated user."""
     queryset = CustomUser.objects.all()
     serializer_class = UserUpdateSerializer
     permission_classes = [IsAuthenticated]
