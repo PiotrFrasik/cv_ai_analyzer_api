@@ -3,10 +3,10 @@ from .models import CV, JobOffer
 
 @admin.register(CV)
 class CVAdmin(admin.ModelAdmin):
-    list_display = ['owner', 'file', 'uploaded_at']
+    list_display = ['owner', 'id', 'file', 'uploaded_at']
     search_fields = ['owner__username', 'status']
 
 @admin.register(JobOffer)
 class JobOfferAdmin(admin.ModelAdmin):
-    list_display = ['owner', 'title', 'created_at']
+    list_display = ['owner', 'id', 'title', 'created_at']
     search_fields = ['owner__username', 'title', 'skills', 'created_at']
