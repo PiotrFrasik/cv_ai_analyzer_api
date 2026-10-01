@@ -1,6 +1,6 @@
-from rest_framework import permissions
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated 
+from rest_framework.throttling import UserRateThrottle
 
 from .models import CV, JobOffer
 from .serializers import CVCreateSerializer, JobOfferCreateSerializer, CVDetailSerializer, JobOfferDetailSerializer
@@ -10,10 +10,17 @@ from .utils import extract_text_from_pdf
 from analysis.models import Analysis
 from analysis.tasks import run_ai_analysis
 
+class CVThrottle(UserRateThrottle):
+    scope = 'cv'
+
+class JobOfferThrottle(UserRateThrottle):
+    scope = 'job_offer'
+
 class CVCreateAPIView(generics.CreateAPIView):
     queryset = CV.objects.all()
     serializer_class = CVCreateSerializer
     permission_classes = [IsAuthenticated]
+    throttle_classes = [CVThrottle]
 
     def perform_create(self, serializer):
         old_cv = CV.objects.filter(owner=self.request.user).first()
@@ -40,6 +47,7 @@ class JobOfferCreateAPIView(generics.CreateAPIView):
     queryset = JobOffer.objects.all()
     serializer_class = JobOfferCreateSerializer
     permission_classes = [IsAuthenticated]
+    throttle_classes = [JobOfferThrottle]
 
     def perform_create(self, serializer):
         job_offer = serializer.save(owner=self.request.user)
@@ -77,6 +85,11 @@ class JobOfferListAPIView(generics.ListAPIView):
 class CVDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CV.objects.all()
 
+    def get_throttles(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return [CVThrottle()]
+        return super().get_throttles()
+
     def get_permissions(self):
         if self.request.method in ['PUT', 'PATCH', 'DELETE']:
             return [IsAuthenticated(), IsOwner()]
@@ -111,6 +124,12 @@ class CVDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 class JobOfferDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = JobOffer.objects.all()
+
+    def get_throttles(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return [JobOfferThrottle()]
+        return super().get_throttles()
+
 
     def get_permissions(self):
         if self.request.method in ['PUT', 'PATCH', 'DELETE']:
