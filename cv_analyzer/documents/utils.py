@@ -1,5 +1,8 @@
 import os
+from typing import Union
+
 import pymupdf
+from django.db.models.fields.files import FieldFile
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -12,7 +15,7 @@ client = genai.Client(
     http_options=types.HttpOptions(timeout=30000)
 )
 
-def extract_text_from_pdf(file) -> str:
+def extract_text_from_pdf(file: Union[FieldFile, str]) -> str:
     """
     Extracts raw text from an uploaded PDF file.
     """
@@ -30,7 +33,7 @@ def extract_text_from_pdf(file) -> str:
 
     return text
 
-def get_ai_analysis(cv_text: str, job_offer) -> tuple[int, str]:
+def get_ai_analysis(cv_text: str, job_offer: "JobOffer") -> tuple[int, list[str]]:
     """
     Sends CV and job offer text to Gemini and returns a match score (0-100) and missing skills.
     """

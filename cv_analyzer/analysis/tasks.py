@@ -9,7 +9,7 @@ from django.db import transaction
     retry_backoff_max=600,
     retry_jitter=True
 )
-def run_ai_analysis(self, analysis_id):
+def run_ai_analysis(self, analysis_id: int) -> None:
     """
     Fetch Analysis by ID, run AI scoring, and save results.
     Guarantees idempotency via select_for_update and status checking.
