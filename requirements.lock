@@ -1,3 +1,4 @@
+# Dependency lockfile generated for reproducible builds
 amqp==5.4.0
 annotated-types==0.8.0
 anyio==4.15.1
