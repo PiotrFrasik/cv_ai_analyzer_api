@@ -25,7 +25,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
 urlpatterns = [
-    path('', RedirectView.as_view(url_name="swagger-ui", permanent=False)),
+    path('', RedirectView.as_view(pattern_name="swagger-ui", permanent=False)),
 
     path('admin/', admin.site.urls),
 
