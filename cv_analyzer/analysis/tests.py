@@ -4,6 +4,7 @@ from documents.models import CV, JobOffer
 from django.urls import reverse
 from users.models import CustomUser
 from rest_framework import status
+from unittest.mock import patch
 
 class AnalysisAPITests(APITestCase):
     def setUp(self):
@@ -48,8 +49,10 @@ class AnalysisAPITests(APITestCase):
 
         self.url_list = reverse("analysis_list")
 
+        # Completed analysis for candidate using separate CV
+        cv_done = CV.objects.create(owner=self.candidate, raw_text="test done", status=CV.Status.PROCESSED)
         self.done_analysis = Analysis.objects.create(
-            cv=self.cv,
+            cv=cv_done,
             job_offer=self.job_offer,
             status=Analysis.Status.DONE,
             match_score=85.50,
@@ -100,3 +103,22 @@ class AnalysisAPITests(APITestCase):
         self.assertEqual(float(response.data['match_score']), 85.50)
         self.assertEqual(response.data['missing_skills'], "Docker, AWS")
         self.assertEqual(response.data['status'], Analysis.Status.DONE)
+
+    def test_unique_constraint_on_cv_and_job_offer(self):
+        # Creating a duplicate Analysis for the same CV and JobOffer should raise IntegrityError
+        from django.db import IntegrityError
+        with self.assertRaises(IntegrityError):
+            Analysis.objects.create(cv=self.cv, job_offer=self.job_offer)
+
+    @patch('documents.utils.get_ai_analysis', return_value=(90.0, "None"))
+    def test_run_ai_analysis_idempotency_when_already_processing_or_done(self, mock_ai):
+        # Task should abort early without invoking AI service if already processing or done
+        from analysis.tasks import run_ai_analysis
+        self.analysis.status = Analysis.Status.PROCESSING
+        self.analysis.save()
+
+        run_ai_analysis(self.analysis.id)
+
+        # AI analysis function should NOT be called again
+        mock_ai.assert_not_called()
+

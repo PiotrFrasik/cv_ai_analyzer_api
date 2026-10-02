@@ -42,12 +42,13 @@ class CVCreateAPIView(generics.CreateAPIView):
             preferred_department = self.request.user.candidate_profile.preferred_department
             offers = JobOffer.objects.filter(owner__recruiter_profile__department=preferred_department)
             for offer in offers:
-                analysis = Analysis.objects.create(
+                analysis, created = Analysis.objects.get_or_create(
                     cv=cv, 
                     job_offer=offer, 
-                    status=Analysis.Status.PROCESSING
+                    defaults={'status': Analysis.Status.PROCESSING}
                 )
-                run_ai_analysis.delay(analysis.id)
+                if created:
+                    run_ai_analysis.delay(analysis.id)
                 
 class JobOfferCreateAPIView(generics.CreateAPIView):
     """
@@ -66,12 +67,13 @@ class JobOfferCreateAPIView(generics.CreateAPIView):
             cvs = CV.objects.filter(owner__candidate_profile__preferred_department=department)
 
             for cv in cvs:
-                analysis = Analysis.objects.create(
+                analysis, created = Analysis.objects.get_or_create(
                     cv=cv, 
                     job_offer=job_offer, 
-                    status=Analysis.Status.PROCESSING
+                    defaults={'status': Analysis.Status.PROCESSING}
                 )
-                run_ai_analysis.delay(analysis.id)
+                if created:
+                    run_ai_analysis.delay(analysis.id)
 
 class CVListAPIView(generics.ListAPIView):
     """List CVs belonging to the authenticated user."""
@@ -131,12 +133,13 @@ class CVDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
             preferred_department = self.request.user.candidate_profile.preferred_department
             offers = JobOffer.objects.filter(owner__recruiter_profile__department=preferred_department)
             for offer in offers:
-                analysis = Analysis.objects.create(
+                analysis, created = Analysis.objects.get_or_create(
                     cv=cv,
                     job_offer=offer,
-                    status=Analysis.Status.PROCESSING
+                    defaults={'status': Analysis.Status.PROCESSING}
                 )
-                run_ai_analysis.delay(analysis.id)
+                if created:
+                    run_ai_analysis.delay(analysis.id)
 
 class JobOfferDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     """
@@ -171,9 +174,10 @@ class JobOfferDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
             department = self.request.user.recruiter_profile.department
             cvs = CV.objects.filter(owner__candidate_profile__preferred_department=department)
             for cv in cvs:
-                analysis = Analysis.objects.create(
+                analysis, created = Analysis.objects.get_or_create(
                     cv=cv,
                     job_offer=job_offer,
-                    status=Analysis.Status.PROCESSING
+                    defaults={'status': Analysis.Status.PROCESSING}
                 )
-                run_ai_analysis.delay(analysis.id)
+                if created:
+                    run_ai_analysis.delay(analysis.id)

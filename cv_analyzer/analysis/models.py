@@ -5,6 +5,9 @@ class Analysis(models.Model):
 
     class Meta:
         verbose_name_plural = "analysis"
+        constraints = [
+            models.UniqueConstraint(fields=['cv', 'job_offer'], name='unique_cv_job_offer')
+        ]
 
     cv = models.ForeignKey(
         CV,
