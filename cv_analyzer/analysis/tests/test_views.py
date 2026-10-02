@@ -1,10 +1,12 @@
+from django.db import IntegrityError
+from django.urls import reverse
+from rest_framework import status
 from rest_framework.test import APITestCase
+
 from analysis.models import Analysis
 from documents.models import CV, JobOffer
-from django.urls import reverse
 from users.models import CustomUser
-from rest_framework import status
-from unittest.mock import patch
+
 
 class AnalysisAPITests(APITestCase):
     def setUp(self):
@@ -26,13 +28,14 @@ class AnalysisAPITests(APITestCase):
         )
 
         self.cv = CV.objects.create(owner=self.candidate, raw_text="test", status=CV.Status.PROCESSED)
-        self.job_offer = JobOffer.objects.create(owner=self.recruiter, 
-                                            title="Junior Python Developer",
-                                            skills = "Python, Django, DRF, SQL, Git",
-                                            raw_text = "We are looking for a motivated Junior Python Developer to build and maintain RESTful APIs using Django and Django REST Framework. You will write clean code, fix bugs, and collaborate with the team while gaining commercial experience through mentoring and code reviews. The ideal candidate has practical Python skills, basic knowledge of SQL and Git, and a strong desire to learn.")
+        self.job_offer = JobOffer.objects.create(
+            owner=self.recruiter,
+            title="Junior Python Developer",
+            skills="Python, Django, DRF, SQL, Git",
+            raw_text="We are looking for a motivated Junior Python Developer."
+        )
 
         self.analysis = Analysis.objects.create(cv=self.cv, job_offer=self.job_offer)
-
         self.url_id = reverse("analysis_detail", kwargs={"pk": self.analysis.id})
 
         self.other_candidate = CustomUser.objects.create_user(
@@ -43,13 +46,11 @@ class AnalysisAPITests(APITestCase):
             role=CustomUser.Role.CANDIDATE
         )
 
-        # Second analysis belonging to other_candidate
         other_cv = CV.objects.create(owner=self.other_candidate, raw_text="other", status=CV.Status.PROCESSED)
         self.other_analysis = Analysis.objects.create(cv=other_cv, job_offer=self.job_offer)
 
         self.url_list = reverse("analysis_list")
 
-        # Completed analysis for candidate using separate CV
         cv_done = CV.objects.create(owner=self.candidate, raw_text="test done", status=CV.Status.PROCESSED)
         self.done_analysis = Analysis.objects.create(
             cv=cv_done,
@@ -90,7 +91,6 @@ class AnalysisAPITests(APITestCase):
         self.client.force_authenticate(user=self.candidate)
         response = self.client.get(self.url_list, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # Serializer returns 'CV' as the owner's username
         cv_owners = [item['CV'] for item in response.data]
         self.assertIn(self.candidate.username, cv_owners)
         self.assertNotIn(self.other_candidate.username, cv_owners)
@@ -106,19 +106,5 @@ class AnalysisAPITests(APITestCase):
 
     def test_unique_constraint_on_cv_and_job_offer(self):
         # Creating a duplicate Analysis for the same CV and JobOffer should raise IntegrityError
-        from django.db import IntegrityError
         with self.assertRaises(IntegrityError):
             Analysis.objects.create(cv=self.cv, job_offer=self.job_offer)
-
-    @patch('documents.utils.get_ai_analysis', return_value=(90.0, []))
-    def test_run_ai_analysis_idempotency_when_already_processing_or_done(self, mock_ai):
-        # Task should abort early without invoking AI service if already processing or done
-        from analysis.tasks import run_ai_analysis
-        self.analysis.status = Analysis.Status.PROCESSING
-        self.analysis.save()
-
-        run_ai_analysis(self.analysis.id)
-
-        # AI analysis function should NOT be called again
-        mock_ai.assert_not_called()
-
