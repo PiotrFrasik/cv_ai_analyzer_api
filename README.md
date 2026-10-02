@@ -30,6 +30,19 @@ GET    /api/analysis/
 GET    /api/analysis/<id>/
 ```
 
+## Architecture
+
+When a CV or Job Offer is created, the system automatically pairs matching documents and dispatches a Celery task (`run_ai_analysis`) to score them via Google Gemini.
+
+**Analysis flow:** Upload CV/Job Offer → create `Analysis` record (`pending`) → dispatch Celery task → worker calls Gemini API → save score and missing skills (`done`).
+
+**Analysis statuses:** `pending` → `processing` → `done` | `failed`.
+
+**Retry policy:** Tasks retry up to 3 times with exponential backoff (capped at 10 min) and randomized jitter. The Gemini client has a 30s timeout to prevent hanging workers.
+
+**Idempotency:** A `UniqueConstraint(cv, job_offer)` prevents duplicate analyses. The task acquires a row lock (`select_for_update`) and skips execution if the status is already `processing` or `done`, so duplicate task deliveries never trigger redundant paid API calls.
+
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
