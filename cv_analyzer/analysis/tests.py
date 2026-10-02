@@ -48,6 +48,15 @@ class AnalysisAPITests(APITestCase):
 
         self.url_list = reverse("analysis_list")
 
+        self.done_analysis = Analysis.objects.create(
+            cv=self.cv,
+            job_offer=self.job_offer,
+            status=Analysis.Status.DONE,
+            match_score=85.50,
+            missing_skills="Docker, AWS"
+        )
+        self.url_done = reverse("analysis_detail", kwargs={"pk": self.done_analysis.id})
+
     def test_get_analysis_unauthenticated_returns_401(self):
         response = self.client.get(self.url_id, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -82,3 +91,12 @@ class AnalysisAPITests(APITestCase):
         cv_owners = [item['CV'] for item in response.data]
         self.assertIn(self.candidate.username, cv_owners)
         self.assertNotIn(self.other_candidate.username, cv_owners)
+
+    def test_analysis_returns_match_score_and_missing_skills(self):
+        # Response should contain computed match score and missing skills
+        self.client.force_authenticate(user=self.candidate)
+        response = self.client.get(self.url_done, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(float(response.data['match_score']), 85.50)
+        self.assertEqual(response.data['missing_skills'], "Docker, AWS")
+        self.assertEqual(response.data['status'], Analysis.Status.DONE)
