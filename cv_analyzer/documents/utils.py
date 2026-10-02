@@ -1,12 +1,16 @@
 import os
 import pymupdf
 from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 
 # Load .env from project root
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
 
-client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+client = genai.Client(
+    api_key=os.getenv("GOOGLE_API_KEY"),
+    http_options=types.HttpOptions(timeout=30000)
+)
 
 def extract_text_from_pdf(file) -> str:
     """
