@@ -1,0 +1,26 @@
+name: Django CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Create environment configuration
+        run: |
+          cp .env.example .env
+          echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> .env
+
+      - name: Build and start Docker Compose services
+        run: docker compose up -d --build
+
+      - name: Run Django test suite
+        run: docker compose exec -T web python manage.py test
