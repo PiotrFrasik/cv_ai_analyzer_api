@@ -1,7 +1,14 @@
 from celery import shared_task
 from django.db import transaction
 
-@shared_task(bind=True, ignore_result=True, max_retries=3)
+@shared_task(
+    bind=True,
+    ignore_result=True,
+    max_retries=3,
+    retry_backoff=True,
+    retry_backoff_max=600,
+    retry_jitter=True
+)
 def run_ai_analysis(self, analysis_id):
     """
     Fetch Analysis by ID, run AI scoring, and save results.
@@ -33,7 +40,7 @@ def run_ai_analysis(self, analysis_id):
 
     except Exception as err:
         try:
-            raise self.retry(exc=err, countdown=30)
+            raise self.retry(exc=err)
         except self.MaxRetriesExceededError:
             # filter().first() returns None instead of raising DoesNotExist
             analysis = Analysis.objects.filter(id=analysis_id).first()
