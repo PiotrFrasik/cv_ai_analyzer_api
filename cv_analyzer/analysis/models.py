@@ -3,33 +3,27 @@ from documents.models import CV, JobOffer
 
 class Analysis(models.Model):
 
-    class Meta:
-        verbose_name_plural = "analysis"
-        constraints = [
-            models.UniqueConstraint(fields=['cv', 'job_offer'], name='unique_cv_job_offer')
-        ]
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        PROCESSING = "processing", "Processing"
+        DONE = "done", "Done"
+        FAILED = "failed", "Failed"
 
     cv = models.ForeignKey(
         CV,
         on_delete=models.CASCADE,
-        related_name = "analysis_cvs"
+        related_name="analysis_cvs"
     )
+
     job_offer = models.ForeignKey(
         JobOffer,
         on_delete=models.CASCADE,
-        related_name = "analysis_job_offers"
+        related_name="analysis_job_offers"
     )
-
-    class Status(models.TextChoices):
-        PENDING = "pending", "Pending"
-        PROCESSING = "processing", "Processing"
-        DONE = "done","Done"
-        FAILED = "failed","Failed"
-
 
     status = models.CharField(
         choices=Status.choices,
-        default="pending",
+        default=Status.PENDING,
         max_length=10
     )
 
@@ -39,9 +33,13 @@ class Analysis(models.Model):
         null=True,
     )
 
-    missing_skills = models.CharField(
-        max_length=255,
-        blank=True, 
-        default="")
+    missing_skills = models.JSONField(
+        default=list,
+        blank=True
+    )
 
-    
+    class Meta:
+        verbose_name_plural = "analysis"
+        constraints = [
+            models.UniqueConstraint(fields=['cv', 'job_offer'], name='unique_cv_job_offer')
+        ]

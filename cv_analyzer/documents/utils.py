@@ -80,7 +80,8 @@ def get_ai_analysis(cv_text: str, job_offer) -> tuple[int, str]:
         )
         parts = response.output_text.strip().split("|",1)
         score = max(0, min(100, int(parts[0].strip())))
-        missing = parts[1].strip() if len(parts) > 1 and parts[1].strip().lower() != "none" else ""
+        raw_missing = parts[1].strip() if len(parts) > 1 and parts[1].strip().lower() != "none" else ""
+        missing = [s.strip() for s in raw_missing.split(",") if s.strip()] if raw_missing else []
         return score, missing
     except Exception:
-        return 0, ""
+        return 0, []

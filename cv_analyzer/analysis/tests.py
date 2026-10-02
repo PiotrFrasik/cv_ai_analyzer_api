@@ -56,7 +56,7 @@ class AnalysisAPITests(APITestCase):
             job_offer=self.job_offer,
             status=Analysis.Status.DONE,
             match_score=85.50,
-            missing_skills="Docker, AWS"
+            missing_skills=["Docker", "AWS"]
         )
         self.url_done = reverse("analysis_detail", kwargs={"pk": self.done_analysis.id})
 
@@ -101,7 +101,7 @@ class AnalysisAPITests(APITestCase):
         response = self.client.get(self.url_done, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(float(response.data['match_score']), 85.50)
-        self.assertEqual(response.data['missing_skills'], "Docker, AWS")
+        self.assertEqual(response.data['missing_skills'], ["Docker", "AWS"])
         self.assertEqual(response.data['status'], Analysis.Status.DONE)
 
     def test_unique_constraint_on_cv_and_job_offer(self):
@@ -110,7 +110,7 @@ class AnalysisAPITests(APITestCase):
         with self.assertRaises(IntegrityError):
             Analysis.objects.create(cv=self.cv, job_offer=self.job_offer)
 
-    @patch('documents.utils.get_ai_analysis', return_value=(90.0, "None"))
+    @patch('documents.utils.get_ai_analysis', return_value=(90.0, []))
     def test_run_ai_analysis_idempotency_when_already_processing_or_done(self, mock_ai):
         # Task should abort early without invoking AI service if already processing or done
         from analysis.tasks import run_ai_analysis
