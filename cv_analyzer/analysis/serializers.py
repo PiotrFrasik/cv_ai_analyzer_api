@@ -5,16 +5,9 @@ class AnalysisDetailSerializer(serializers.ModelSerializer):
     """
     Displaying CV analysis results.
     """
-    
+    CV = serializers.CharField(source='cv.owner.username', read_only=True)
+    job_offer  = serializers.CharField(source='job_offer.title', read_only=True)
+
     class Meta:
         model = Analysis
-        fields = ['cv', 'job_offer', 'status', 'match_score', 'missing_skills']
-
-    def to_representation(self, instance):
-        return{
-            'CV': instance.cv.owner.username,
-            'job_offer': instance.job_offer.title,
-            'status': instance.status,
-            'match_score': instance.match_score,
-            'missing_skills': instance.missing_skills,
-        }
+        fields = ['CV', 'job_offer', 'status', 'match_score', 'missing_skills']
