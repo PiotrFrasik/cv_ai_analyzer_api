@@ -27,7 +27,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 urlpatterns = [
     path('', RedirectView.as_view(pattern_name="swagger-ui", permanent=False)),
 
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
 
     # Logging Endpoint 
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
