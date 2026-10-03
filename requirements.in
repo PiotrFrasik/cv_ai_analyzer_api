@@ -14,5 +14,8 @@ google-genai>=2.22.0
 # PDF parsing
 pymupdf>=1.28.2
 
+# for production
+gunicorn>=23.0.0
+
 # PostgreSQL driver
 psycopg[binary]>=3.3
