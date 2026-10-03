@@ -3,6 +3,15 @@
 from django.db import migrations, models
 
 
+def fix_invalid_missing_skills(apps, schema_editor):
+    """Set missing_skills to [] for any rows with NULL or invalid JSON."""
+    Analysis = apps.get_model('analysis', 'Analysis')
+    db_alias = schema_editor.connection.alias
+    Analysis.objects.using(db_alias).filter(
+        missing_skills__isnull=True
+    ).update(missing_skills=[])
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -10,6 +19,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(fix_invalid_missing_skills, migrations.RunPython.noop),
         migrations.AlterField(
             model_name='analysis',
             name='missing_skills',
