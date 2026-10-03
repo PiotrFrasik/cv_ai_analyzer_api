@@ -16,7 +16,7 @@ def run_ai_analysis(self, analysis_id: int) -> None:
     """
     # Imports inside a task - Django must already be loaded when the task executes
     from analysis.models import Analysis
-    from documents.utils import get_ai_analysis
+    from analysis.services.gemini_client import get_ai_analysis
 
     try:
         with transaction.atomic():
@@ -36,7 +36,7 @@ def run_ai_analysis(self, analysis_id: int) -> None:
         analysis.match_score = score
         analysis.missing_skills = missing
         analysis.status = Analysis.Status.DONE
-        analysis.save()
+        analysis.save(update_fields=['match_score', 'missing_skills', 'status'])
 
     except Exception as err:
         try:
@@ -46,4 +46,4 @@ def run_ai_analysis(self, analysis_id: int) -> None:
             analysis = Analysis.objects.filter(id=analysis_id).first()
             if analysis:
                 analysis.status = Analysis.Status.FAILED
-                analysis.save()
+                analysis.save(update_fields=['status'])
