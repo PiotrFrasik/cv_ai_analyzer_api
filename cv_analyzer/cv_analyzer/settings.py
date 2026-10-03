@@ -155,7 +155,7 @@ USE_TZ = True
 SCRIPT_NAME = os.getenv('FORCE_SCRIPT_NAME', '')
 FORCE_SCRIPT_NAME = SCRIPT_NAME or None
 
-STATIC_URL = (SCRIPT_NAME + '/static/') if SCRIPT_NAME else '/static/'
+STATIC_URL = os.getenv('STATIC_URL', (SCRIPT_NAME + '/static/') if SCRIPT_NAME else '/cv_ai-analyzer-api/static/')
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
