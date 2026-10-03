@@ -36,7 +36,7 @@ urlpatterns = [
 
     #Swagger
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', SpectacularSwaggerView.as_view(url='../schema/'), name='swagger-ui'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url='/cv_ai-analyzer-api/api/schema/'), name='swagger-ui'),
 
     path('api/user/', include('users.urls')),
     path('api/', include('documents.urls')),
