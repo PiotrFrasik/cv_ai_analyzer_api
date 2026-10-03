@@ -91,7 +91,7 @@ class AnalysisAPITests(APITestCase):
         self.client.force_authenticate(user=self.candidate)
         response = self.client.get(self.url_list, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        cv_owners = [item['CV'] for item in response.data]
+        cv_owners = [item['cv_owner'] for item in response.data]
         self.assertIn(self.candidate.username, cv_owners)
         self.assertNotIn(self.other_candidate.username, cv_owners)
 
