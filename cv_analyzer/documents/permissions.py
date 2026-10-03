@@ -5,8 +5,8 @@ class IsCVOwnerOrRecruiter(permissions.BasePermission):
         if request.user == obj.owner:
             return True
         
-        cvs = obj.analysis_cvs.all()
-        if cvs.filter(job_offer__owner = request.user).exists():
+        analyses = obj.analyses.all()
+        if analyses.filter(job_offer__owner=request.user).exists():
             return True
 
         return False
