@@ -23,4 +23,4 @@ jobs:
         run: docker compose up -d --build
 
       - name: Run Django test suite
-        run: docker compose exec -T web python manage.py test
+        run: docker compose exec -T web python manage.py test --noinput
