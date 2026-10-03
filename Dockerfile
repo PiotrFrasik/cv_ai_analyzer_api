@@ -9,6 +9,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY cv_analyzer/ .
+RUN adduser --disabled-password --no-create-home appuser \
+  && chown -R appuser:appuser /app
+
+COPY --chown=appuser:appuser cv_analyzer/ .
+
+USER appuser
 
 EXPOSE 8000
