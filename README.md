@@ -42,6 +42,8 @@ When a CV or Job Offer is created, the system automatically pairs matching docum
 
 **Idempotency:** A `UniqueConstraint(cv, job_offer)` prevents duplicate analyses. The task acquires a row lock (`select_for_update`) and skips execution if the status is already `processing` or `done`, so duplicate task deliveries never trigger redundant paid API calls.
 
+**File Upload Constraints:** CV uploads (`POST /api/cv/create/`) are strictly validated for `.pdf` file extension and limited to a maximum file size of 5 MB (`DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880`).
+
 
 ## License
 
