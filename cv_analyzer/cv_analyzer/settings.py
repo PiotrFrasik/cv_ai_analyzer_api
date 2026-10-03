@@ -33,6 +33,15 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if not DEBUG else ['*']
 
+# Reverse proxy settings for Nginx
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+if csrf_origins:
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(',') if origin.strip()]
+
+
 
 # Application definition
 
@@ -143,7 +152,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-STATIC_URL = 'static/'
+SCRIPT_NAME = os.getenv('FORCE_SCRIPT_NAME', '')
+FORCE_SCRIPT_NAME = SCRIPT_NAME or None
+
+STATIC_URL = (SCRIPT_NAME + '/static/') if SCRIPT_NAME else '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 
 
 # Email
