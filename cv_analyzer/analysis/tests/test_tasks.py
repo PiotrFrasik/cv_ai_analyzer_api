@@ -36,7 +36,7 @@ class AnalysisTaskTests(TestCase):
 
         self.analysis = Analysis.objects.create(cv=self.cv, job_offer=self.job_offer)
 
-    @patch('documents.utils.get_ai_analysis', return_value=(88.5, ["AWS"]))
+    @patch('analysis.services.gemini_client.get_ai_analysis', return_value=(88.5, ["AWS"]))
     def test_run_ai_analysis_success_path(self, mock_ai):
         # Task should fetch analysis, invoke AI service, update score, missing skills and set status=DONE
         run_ai_analysis(self.analysis.id)
@@ -47,7 +47,7 @@ class AnalysisTaskTests(TestCase):
         self.assertEqual(self.analysis.status, Analysis.Status.DONE)
         mock_ai.assert_called_once()
 
-    @patch('documents.utils.get_ai_analysis', return_value=(90.0, []))
+    @patch('analysis.services.gemini_client.get_ai_analysis', return_value=(90.0, []))
     def test_run_ai_analysis_idempotency_when_already_processing_or_done(self, mock_ai):
         # Task should abort early without invoking AI service if already processing or done
         self.analysis.status = Analysis.Status.PROCESSING
@@ -63,7 +63,7 @@ class AnalysisTaskTests(TestCase):
         run_ai_analysis(self.analysis.id)
         mock_ai.assert_not_called()
 
-    @patch('documents.utils.get_ai_analysis', side_effect=Exception("API Error"))
+    @patch('analysis.services.gemini_client.get_ai_analysis', side_effect=Exception("API Error"))
     def test_run_ai_analysis_failure_path_sets_status_failed(self, mock_ai):
         # When AI call raises exception and max retries are exceeded, status should transition to FAILED
         with patch.object(run_ai_analysis, 'retry', side_effect=MaxRetriesExceededError()):
