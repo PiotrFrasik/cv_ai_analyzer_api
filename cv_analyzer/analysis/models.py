@@ -12,13 +12,13 @@ class Analysis(models.Model):
     cv = models.ForeignKey(
         CV,
         on_delete=models.CASCADE,
-        related_name="analysis_cvs"
+        related_name="analyses"
     )
 
     job_offer = models.ForeignKey(
         JobOffer,
         on_delete=models.CASCADE,
-        related_name="analysis_job_offers"
+        related_name="analyses"
     )
 
     status = models.CharField(

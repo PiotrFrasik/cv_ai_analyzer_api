@@ -127,7 +127,7 @@ class CVDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         cv.status = CV.Status.PROCESSED
         cv.save()
 
-        cv.analysis_cvs.all().delete()
+        cv.analyses.all().delete()
 
         if hasattr(self.request.user, 'candidate_profile'):
             preferred_department = self.request.user.candidate_profile.preferred_department
@@ -168,7 +168,7 @@ class JobOfferDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         job_offer = serializer.save()
 
-        job_offer.analysis_job_offers.all().delete()
+        job_offer.analyses.all().delete()
 
         if hasattr(self.request.user, 'recruiter_profile'):
             department = self.request.user.recruiter_profile.department
