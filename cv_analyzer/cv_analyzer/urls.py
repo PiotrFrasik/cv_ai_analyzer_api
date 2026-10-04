@@ -25,7 +25,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
 urlpatterns = [
-    path('', RedirectView.as_view(pattern_name="swagger-ui", permanent=False)),
+    path('', RedirectView.as_view(url="/cv_ai-analyzer-api/api/docs/", permanent=False)),
     path('api/', RedirectView.as_view(pattern_name="swagger-ui", permanent=False)),
 
     # path('admin/', admin.site.urls),
@@ -40,6 +40,6 @@ urlpatterns = [
     path('api/docs/', SpectacularSwaggerView.as_view(url='/cv_ai-analyzer-api/api/schema/'), name='swagger-ui'),
 
     path('api/user/', include('users.urls')),
-    path('api/', include('documents.urls')),
-    path('api/', include('analysis.urls'))
+    path('api/documents/', include('documents.urls')),
+    path('api/analysis/', include('analysis.urls'))
 ]
